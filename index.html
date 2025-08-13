@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energyroot - Energía Natural de Malanga</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Russo One (Fierce/Sporty) & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Applying the Inter font family as base */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212; /* Dark background */
+            cursor: none; /* Hide default cursor */
+        }
+
+        /* New Energetic Color Palette from Logo */
+        :root {
+            --primary-blue: #00BFFF;   /* Electric Blue */
+            --accent-orange: #FF6700; /* Vibrant Orange for accents */
+            --navy-blue: #001F3F;      /* Navy Blue for chat */
+            --dark-bg: #121212;
+            --card-bg: #1A1A1A;
+            --light-text: #FFFFFF;
+            --secondary-text: #A0A0A0;
+            --header-text: #023E8A; /* A dark blue for header text on white bg */
+        }
+        
+        /* Sporty/Fierce Font */
+        .font-fierce {
+            font-family: 'Russo One', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Custom Styles */
+        .hero-section {
+            position: relative;
+            overflow: hidden;
+            height: 100vh;
+        }
+        .video-background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150%; 
+            height: 150%;
+            object-fit: cover;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        .hero-overlay {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(to top, rgba(18, 18, 18, 1) 0%, rgba(18, 18, 18, 0.8) 50%, rgba(18, 18, 18, 0) 100%);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: var(--dark-bg);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 191, 255, 0.8);
+        }
+        .text-primary { color: var(--primary-blue); }
+        .text-accent { color: var(--accent-orange); }
+        .text-light { color: var(--light-text); }
+        .text-secondary { color: var(--secondary-text); }
+        .bg-dark { background-color: var(--dark-bg); }
+        .bg-card { background-color: var(--card-bg); }
+
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+            color: var(--header-text);
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-orange);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover {
+            color: var(--accent-orange);
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        /* Product Card Highlight Effect */
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 191, 255, 0.3);
+        }
+        
+        /* Sparks Canvas */
+        #sparks-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        /* WhatsApp Widget Styles */
+        .whatsapp-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+        .whatsapp-window {
+            position: absolute;
+            bottom: calc(100% + 1rem);
+            right: 0;
+            width: 350px;
+            max-width: calc(100vw - 4rem); /* Ensure it fits on small screens */
+            background-color: #252D36;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+        .whatsapp-window.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .whatsapp-header {
+            background-color: var(--navy-blue);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .whatsapp-operator-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        .whatsapp-body {
+            padding: 1rem;
+            background-image: url('https://i.pinimg.com/736x/8c/98/99/8c98994518b575bfd8c949e91d20548b.jpg');
+            background-size: contain;
+        }
+        .whatsapp-message {
+            background-color: #182229;
+            color: var(--light-text);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            max-width: 80%;
+            margin-bottom: 1rem;
+        }
+        .whatsapp-replies {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .whatsapp-reply {
+            background-color: #2C3A47;
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+            padding: 0.75rem;
+            border-radius: 9999px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .whatsapp-reply:hover {
+            background-color: rgba(0, 191, 255, 0.2);
+        }
+        .whatsapp-button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--navy-blue);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 15px rgba(0, 31, 63, 0.4);
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+        .whatsapp-button:hover {
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<body class="bg-dark text-light">
+
+    <!-- Sparks Canvas -->
+    <canvas id="sparks-canvas"></canvas>
+
+    <!-- Header -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-2 flex justify-between items-center">
+            <a href="#">
+                <img src="https://i.postimg.cc/tCCxrxjj/7daaca99-76b8-4a7f-9753-8933bd331f58-removebg-preview.png" alt="Energyroot Logo" class="h-24 sm:h-32 w-auto">
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#productos" class="nav-link font-fierce text-lg">Productos</a>
+                <a href="#nosotros" class="nav-link font-fierce text-lg">Nosotros</a>
+                <a href="#contacto" class="nav-link font-fierce text-lg">Contáctanos</a>
+            </div>
+            <div class="flex items-center gap-4">
+                 <button id="cart-button" class="text-3xl hover:text-accent-orange transition relative" style="color: var(--header-text);">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">0</span>
+                </button>
+                <button id="mobile-menu-button" class="md:hidden text-3xl" style="color: var(--header-text);">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white px-6 pb-4">
+            <a href="#productos" class="block py-3 text-center font-fierce" style="color: var(--header-text);">Productos</a>
+            <a href="#nosotros" class="block py-3 text-center font-fierce" style="color: var(--header-text);">Nosotros</a>
+            <a href="#contacto" class="block py-3 text-center font-fierce" style="color: var(--header-text);">Contáctanos</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section with Video Background -->
+        <section class="hero-section">
+            <iframe 
+                class="video-background"
+                src="https://www.youtube.com/embed/j4mOb_QaGHs?autoplay=1&mute=1&loop=1&playlist=j4mOb_QaGHs&controls=0&showinfo=0&autohide=1&modestbranding=1"
+                frameborder="0" 
+                allow="autoplay; encrypted-media" 
+                allowfullscreen>
+            </iframe>
+            <div class="hero-overlay">
+                <div class="w-full text-center text-white pb-20">
+                    <h2 class="text-3xl md:text-4xl font-black leading-tight mb-8 px-6 font-fierce text-shadow-lg shadow-black">
+                        La Verdadera Fuerza de la Naturaleza
+                    </h2>
+                    <a href="#productos" class="btn-primary font-fierce text-xl py-4 px-10 rounded-full inline-block shadow-lg">
+                        Conoce Nuestros Productos
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="productos" class="py-20 bg-dark">
+            <div class="container mx-auto px-6">
+                <h3 class="font-fierce text-4xl md:text-5xl text-center mb-4 text-primary">Nuestro Portafolio</h3>
+                <p class="text-center text-secondary mb-12 max-w-2xl mx-auto">Una bebida para cada momento de tu día. Energía que se adapta a tu estilo de vida.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Product Cards will be injected here by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="nosotros" class="py-20 bg-card">
+            <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <img src="https://i.postimg.cc/KYm0G5kH/fde8281f-6d65-4ee2-af9d-bee5133d5fbf.png" alt="Equipo de Energyroot" class="rounded-xl w-full h-full object-cover">
+                </div>
+                <div class="md:w-1/2 text-center md:text-left">
+                    <h3 class="font-fierce text-4xl md:text-5xl text-primary mb-4">Nacimos de nuestra tierra</h3>
+                    <p class="text-secondary mb-4 text-lg">
+                        En Energyroot, creemos en el poder de lo natural. Nuestra empresa, con orgullo de Santo Domingo, Ecuador, se dedica a crear bebidas energéticas que cuidan tu salud y te impulsan a alcanzar tus metas. Usamos malanga, un tubérculo ancestral, para ofrecerte una fuente de energía limpia y sostenible.
+                    </p>
+                    <p class="text-secondary text-lg">
+                        Nuestro compromiso es crear conciencia y ofrecer un producto saludable para nuestra comunidad y para todo el Ecuador.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contacto" class="py-20 bg-dark">
+            <div class="container mx-auto px-6">
+                <div class="max-w-xl mx-auto">
+                    <h4 class="font-fierce text-4xl md:text-5xl text-center text-primary mb-6">Contáctanos</h4>
+                     <p class="text-center text-secondary mb-8">¿Tienes preguntas o quieres ser distribuidor? Déjanos tus datos.</p>
+                    <form id="contact-form" class="bg-card p-8 rounded-xl shadow-lg">
+                        <div class="mb-4">
+                            <label for="name" class="block text-light font-semibold mb-2">Nombre</label>
+                            <input type="text" id="name" name="name" placeholder="Ej: Juan Pérez" class="w-full px-4 py-2 bg-dark rounded-lg border border-secondary/30 focus:outline-none focus:ring-2 focus:ring-primary text-light">
+                        </div>
+                        <div class="mb-4">
+                            <label for="email" class="block text-light font-semibold mb-2">Correo Electrónico</label>
+                            <input type="email" id="email" name="email" placeholder="Ej: juan.perez@correo.com" class="w-full px-4 py-2 bg-dark rounded-lg border border-secondary/30 focus:outline-none focus:ring-2 focus:ring-primary text-light">
+                        </div>
+                        <div class="mb-4">
+                            <label for="phone" class="block text-light font-semibold mb-2">Teléfono</label>
+                            <div class="flex">
+                                <select id="country-code" name="country-code" class="bg-dark border border-secondary/30 rounded-l-lg px-2 text-light focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <!-- Country codes will be populated by JS -->
+                                </select>
+                                <input type="tel" id="phone" name="phone" placeholder="Ej: 987654321" class="w-full px-4 py-2 bg-dark rounded-r-lg border border-secondary/30 focus:outline-none focus:ring-2 focus:ring-primary text-light">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label for="message" class="block text-light font-semibold mb-2">Mensaje</label>
+                            <textarea id="message" name="message" rows="4" placeholder="Escribe tu mensaje aquí..." class="w-full px-4 py-2 bg-dark rounded-lg border border-secondary/30 focus:outline-none focus:ring-2 focus:ring-primary text-light"></textarea>
+                        </div>
+                        <button type="submit" class="w-full btn-primary font-fierce text-xl py-3 px-8 rounded-full shadow-lg">
+                            Enviar Mensaje
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-card text-light py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 Energyroot. Todos los derechos reservados.</p>
+            <p class="text-sm text-secondary">Santo Domingo, Ecuador</p>
+            <div class="flex justify-center space-x-6 mt-4">
+                <a href="#" class="text-secondary hover:text-primary text-2xl transition"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" class="text-secondary hover:text-primary text-2xl transition"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="text-secondary hover:text-primary text-2xl transition"><i class="fa-brands fa-tiktok"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Modal -->
+    <div id="cart-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div class="modal-container bg-card w-full max-w-md rounded-xl shadow-2xl p-6 relative transform scale-95 border border-primary/20">
+            <button id="close-modal-button" class="absolute top-4 right-4 text-3xl text-secondary hover:text-light">&times;</button>
+            <h2 class="font-fierce text-3xl text-primary mb-4">Mi Carrito</h2>
+            <div id="cart-items-container" class="space-y-4 max-h-64 overflow-y-auto pr-2">
+                <p id="empty-cart-message" class="text-secondary">Tu carrito está vacío.</p>
+            </div>
+            <div class="border-t border-secondary/20 mt-6 pt-4">
+                <div class="flex justify-between items-center font-bold text-xl">
+                    <span class="text-light">Total:</span>
+                    <span id="cart-total" class="text-primary">$0.00</span>
+                </div>
+                <div class="mt-6 space-y-3">
+                    <!-- PayPal Buy Now Button Form -->
+                    <form action="https://www.paypal.com/ncp/payment/M5L3H3WKUQ3H8" method="post" target="_blank" class="w-full text-center">
+                        <button type="submit" class="w-full bg-yellow-400 text-black font-fierce py-3 px-6 rounded-full hover:bg-yellow-300 transition shadow-lg">
+                            Comprar ahora
+                        </button>
+                        <div class="mt-2">
+                            <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="Accepted cards" class="mx-auto h-6" />
+                            <p class="text-xs text-secondary mt-1"> Con la tecnología de <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" class="h-3 inline-block relative" style="top: 2px;"/></p>
+                        </div>
+                    </form>
+                    <button id="clear-cart-button" class="w-full bg-secondary/20 text-light font-bold py-3 px-6 rounded-full hover:bg-secondary/40 transition">
+                        Vaciar Carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Widget -->
+    <div class="whatsapp-container">
+        <div id="whatsapp-window" class="whatsapp-window">
+            <div class="whatsapp-header">
+                <img src="https://i.postimg.cc/d07gPBbc/Whats-App-Image-2025-08-13-at-12-02-34-AM.jpg" alt="Operador" class="whatsapp-operator-img">
+                <div>
+                    <div class="font-bold">Asistente Energyroot</div>
+                    <div class="text-xs">En línea</div>
+                </div>
+            </div>
+            <div class="whatsapp-body">
+                <div class="whatsapp-message">
+                    ¡Hola Campeón! 🏆 ¿Listo para desatar tu energía? ¡Estamos aquí para ayudarte!
+                </div>
+                <div class="whatsapp-replies">
+                    <a class="whatsapp-reply" data-message="¡Hola! 💪 Quiero saber más sobre los productos.">Saber más de los productos</a>
+                    <a class="whatsapp-reply" data-message="¡Qué tal! 🔥 Me interesa ser distribuidor.">Quiero ser distribuidor</a>
+                    <a class="whatsapp-reply" data-message="¡Hola! 🙏 Necesito ayuda con un pedido.">Necesito ayuda</a>
+                </div>
+            </div>
+        </div>
+        <div id="whatsapp-button" class="whatsapp-button font-fierce">
+            <i class="fab fa-whatsapp mr-2"></i>
+            <span>¡Chatea con nosotros!</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Product Data ---
+            const products = [
+                { id: 1, name: 'Malanga Power Original', price: 3.75, image: 'https://i.postimg.cc/pdNJrJ9H/Chat-GPT-Image-12-ago-2025-23-06-50-removebg-preview.png', description: 'Energía sostenida sin estimulantes artificiales. Sabor neutro y ligero.', presentation: 'Botella 500 ml', audience: 'Deportistas, estudiantes' },
+                { id: 2, name: 'Malanga Power + Frutas Tropicales', price: 3.75, image: 'https://i.postimg.cc/k4mqXzFd/Chat-GPT-Image-12-ago-2025-23-30-10-removebg-preview.png', description: 'Mezcla de malanga, maracuyá y piña. Energía que refresca.', presentation: 'Botella 350 ml', audience: 'Jóvenes, funcionales' },
+                { id: 3, name: 'Malanga Power Zero', price: 3.75, image: 'https://i.postimg.cc/ZnfSHRkT/Chat-GPT-Image-12-ago-2025-23-30-12-removebg-preview.png', description: 'Toda la energía, sin calorías ni azúcar. Endulzada con stevia.', presentation: 'Lata 330 ml', audience: 'Fitness, dietas' },
+                { id: 4, name: 'Malanga Power Sport', price: 3.75, image: 'https://i.postimg.cc/hv4nVm5y/Chat-GPT-Image-12-ago-2025__23_30_03-removebg-preview.png', description: 'Con electrolitos y vitaminas B para una recuperación óptima.', presentation: 'Botella 600 ml', audience: 'Atletas, activos' },
+                { id: 5, name: 'Malanga Power Shot', price: 3.75, image: 'https://i.postimg.cc/HL5TmdM2/ChatGPT_Image_12_ago_2025__23_30_01-removebg-preview.png', description: 'Impulso concentrado de energía con absorción rápida.', presentation: 'Shot 60 ml', audience: 'Profesionales, conductores' }
+            ];
+
+            const productsContainer = document.querySelector('#productos .grid');
+            let cart = [];
+
+            // --- Render Products ---
+            function renderProducts() {
+                productsContainer.innerHTML = '';
+                products.forEach(product => {
+                    const productCardHTML = `
+                        <div class="product-card bg-card rounded-xl shadow-lg shadow-black/20 overflow-hidden flex flex-col border border-primary/10">
+                            <div class="h-80 flex items-center justify-center bg-card p-4">
+                                <img src="${product.image}" alt="${product.name}" class="max-h-full w-auto object-contain">
+                            </div>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h4 class="text-2xl font-bold text-primary">${product.name}</h4>
+                                <p class="text-secondary mt-2 mb-4 flex-grow">${product.description}</p>
+                                <div class="text-sm mb-4">
+                                    <p class="font-semibold text-light">Presentación: <span class="font-normal text-secondary">${product.presentation}</span></p>
+                                    <p class="font-semibold text-light">Público: <span class="font-normal text-secondary">${product.audience}</span></p>
+                                </div>
+                                <div class="flex justify-between items-center mt-auto">
+                                    <span class="text-3xl font-bold text-primary">$${product.price.toFixed(2)}</span>
+                                    <button class="add-to-cart-btn btn-primary rounded-full px-5 py-2 font-fierce" data-id="${product.id}">
+                                        <i class="fa-solid fa-plus mr-2"></i>Añadir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    productsContainer.innerHTML += productCardHTML;
+                });
+            }
+            
+            // --- Cart Logic ---
+            const cartButton = document.getElementById('cart-button');
+            const cartModal = document.getElementById('cart-modal');
+            const closeModalButton = document.getElementById('close-modal-button');
+            const cartItemsContainer = document.getElementById('cart-items-container');
+            const cartTotalEl = document.getElementById('cart-total');
+            const cartCountEl = document.getElementById('cart-count');
+            const emptyCartMessage = document.getElementById('empty-cart-message');
+            const clearCartButton = document.getElementById('clear-cart-button');
+
+            function addToCart(productId) {
+                const productToAdd = products.find(p => p.id === productId);
+                const existingItem = cart.find(item => item.id === productId);
+
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ ...productToAdd, quantity: 1 });
+                }
+                renderCart();
+            }
+
+            function renderCart() {
+                cartItemsContainer.innerHTML = '';
+                let total = 0;
+                
+                if (cart.length === 0) {
+                    emptyCartMessage.style.display = 'block';
+                } else {
+                    emptyCartMessage.style.display = 'none';
+                    cart.forEach(item => {
+                        total += item.price * item.quantity;
+                        const cartItem = document.createElement('div');
+                        cartItem.className = 'flex justify-between items-center';
+                        cartItem.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-contain rounded-md bg-dark">
+                                <div>
+                                    <h4 class="font-semibold text-light">${item.name}</h4>
+                                    <p class="text-sm text-secondary">$${item.price.toFixed(2)} x ${item.quantity}</p>
+                                </div>
+                            </div>
+                            <span class="font-bold text-lg text-primary">$${(item.price * item.quantity).toFixed(2)}</span>
+                        `;
+                        cartItemsContainer.appendChild(cartItem);
+                    });
+                }
+                
+                cartTotalEl.textContent = `$${total.toFixed(2)}`;
+                cartCountEl.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            }
+            
+            function clearCart() {
+                cart = [];
+                renderCart();
+            }
+
+            // --- Event Listeners ---
+            productsContainer.addEventListener('click', (e) => {
+                if (e.target.closest('.add-to-cart-btn')) {
+                    const button = e.target.closest('.add-to-cart-btn');
+                    const productId = parseInt(button.dataset.id);
+                    addToCart(productId);
+                }
+            });
+            
+            cartButton.addEventListener('click', () => {
+                cartModal.classList.remove('opacity-0', 'pointer-events-none');
+                cartModal.querySelector('.modal-container').classList.remove('scale-95');
+            });
+
+            closeModalButton.addEventListener('click', () => {
+                cartModal.classList.add('opacity-0', 'pointer-events-none');
+                cartModal.querySelector('.modal-container').classList.add('scale-95');
+            });
+            
+            clearCartButton.addEventListener('click', clearCart);
+
+            // --- Mobile Menu Toggle ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            
+            // --- Sparks Effect ---
+            const canvas = document.getElementById('sparks-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            let particles = [];
+
+            const mouse = {
+                x: undefined,
+                y: undefined
+            };
+
+            window.addEventListener('mousemove', (event) => {
+                mouse.x = event.x;
+                mouse.y = event.y;
+                for (let i = 0; i < 3; i++) {
+                    particles.push(new Particle());
+                }
+            });
+
+            class Particle {
+                constructor() {
+                    this.x = mouse.x;
+                    this.y = mouse.y;
+                    this.size = Math.random() * 2 + 1;
+                    this.speedX = Math.random() * 3 - 1.5;
+                    this.speedY = Math.random() * 3 - 1.5;
+                    this.color = `hsl(195, 100%, ${Math.random() * 50 + 50}%)`; // Electric blue and white tones
+                    this.life = 100;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.size > 0.1) this.size -= 0.03;
+                    this.life--;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function handleParticles() {
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                    if (particles[i].size <= 0.1 || particles[i].life <= 0) {
+                        particles.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                handleParticles();
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+            
+            // --- Contact Form Logic ---
+            const contactForm = document.getElementById('contact-form');
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const countryCode = document.getElementById('country-code').value;
+                const phone = document.getElementById('phone').value;
+                const message = document.getElementById('message').value;
+
+                const subject = `Nuevo Mensaje de Contacto de: ${name}`;
+                const body = `
+                    Nombre: ${name}%0D%0A
+                    Correo: ${email}%0D%0A
+                    Teléfono: ${countryCode} ${phone}%0D%0A
+                    %0D%0A
+                    Mensaje:%0D%0A
+                    ${message}
+                `;
+                
+                window.location.href = `mailto:energyrootec@gmail.com?subject=${subject}&body=${body}`;
+            });
+
+            // --- Populate Country Codes ---
+            const countryCodes = [
+                { name: 'Ecuador', code: '+593' },
+                { name: 'Colombia', code: '+57' },
+                { name: 'Perú', code: '+51' },
+                { name: 'EE.UU.', code: '+1' },
+                { name: 'España', code: '+34' },
+            ];
+            const select = document.getElementById('country-code');
+            countryCodes.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = `${country.name} (${country.code})`;
+                if (country.code === '+593') {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+
+            // --- WhatsApp Widget Logic ---
+            const whatsappWindow = document.getElementById('whatsapp-window');
+            const whatsappButton = document.getElementById('whatsapp-button');
+            
+            // Open automatically after 2 seconds
+            setTimeout(() => {
+                whatsappWindow.classList.add('open');
+            }, 2000);
+
+            // Toggle on button click
+            whatsappButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                whatsappWindow.classList.toggle('open');
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!whatsappWindow.contains(e.target) && !whatsappButton.contains(e.target)) {
+                    whatsappWindow.classList.remove('open');
+                }
+            });
+
+            const whatsappReplies = document.querySelectorAll('.whatsapp-reply');
+            whatsappReplies.forEach(reply => {
+                reply.addEventListener('click', () => {
+                    const message = encodeURIComponent(reply.getAttribute('data-message'));
+                    const phone = '593983637611';
+                    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+                });
+            });
+
+            // --- Initial Render ---
+            renderProducts();
+            renderCart();
+        });
+    </script>
+</body>
+</html>
