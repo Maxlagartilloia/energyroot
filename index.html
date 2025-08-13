@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Energyroot - Energía Natural de Malanga</title>
     
+    <!-- PayPal SDK -->
+    <script 
+      src="https://www.paypal.com/sdk/js?client-id=BAA8BBT5N3vjuSthUSXQZZh9IPm_zaRRUe3084VpaA1yt7NcmSuBf984B1eWjFxvDhKsMHzK_zPYyIvMBw&components=hosted-buttons&disable-funding=venmo&currency=USD">
+    </script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -374,9 +379,16 @@
                     <span id="cart-total" class="text-primary">$0.00</span>
                 </div>
                 <div class="mt-6 space-y-3">
-                    <button id="checkout-button" class="w-full bg-yellow-400 text-black font-fierce py-3 px-6 rounded-full hover:bg-yellow-300 transition shadow-lg">
-                        Comprar ahora
-                    </button>
+                    <!-- PayPal Buy Now Button Form -->
+                    <form action="https://www.paypal.com/ncp/payment/M5L3H3WKUQ3H8" method="post" target="_blank" class="w-full text-center">
+                        <button type="submit" class="w-full bg-yellow-400 text-black font-fierce py-3 px-6 rounded-full hover:bg-yellow-300 transition shadow-lg">
+                            Comprar ahora
+                        </button>
+                        <div class="mt-2">
+                            <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="Accepted cards" class="mx-auto h-6" />
+                            <p class="text-xs text-secondary mt-1"> Con la tecnología de <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" class="h-3 inline-block relative" style="top: 2px;"/></p>
+                        </div>
+                    </form>
                     <button id="clear-cart-button" class="w-full bg-secondary/20 text-light font-bold py-3 px-6 rounded-full hover:bg-secondary/40 transition">
                         Vaciar Carrito
                     </button>
@@ -464,7 +476,6 @@
             const cartCountEl = document.getElementById('cart-count');
             const emptyCartMessage = document.getElementById('empty-cart-message');
             const clearCartButton = document.getElementById('clear-cart-button');
-            const checkoutButton = document.getElementById('checkout-button');
 
             function addToCart(productId) {
                 const productToAdd = products.find(p => p.id === parseInt(productId));
@@ -514,23 +525,6 @@
                 cart = [];
                 renderCart();
             }
-            
-            function handleCheckout() {
-                if (cart.length === 0) {
-                    alert("Tu carrito está vacío. Añade productos antes de comprar.");
-                    return;
-                }
-
-                let orderSummary = "¡Hola! Quiero realizar el siguiente pedido:\n";
-                cart.forEach(item => {
-                    orderSummary += `\n- ${item.quantity}x ${item.name}`;
-                });
-                orderSummary += `\n\n*Total: ${cartTotalEl.textContent}*`;
-                
-                const message = encodeURIComponent(orderSummary);
-                const phone = '593983637611';
-                window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-            }
 
             // --- Event Listeners ---
             productsContainer.addEventListener('click', (e) => {
@@ -552,8 +546,7 @@
             });
             
             clearCartButton.addEventListener('click', clearCart);
-            checkoutButton.addEventListener('click', handleCheckout);
-
+            
             // --- Mobile Menu Toggle ---
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
