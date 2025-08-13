@@ -220,6 +220,23 @@
         .whatsapp-button:hover {
             transform: scale(1.05);
         }
+        
+        /* PayPal Button from user */
+        .pp-M5L3H3WKUQ3H8{
+            text-align:center;
+            border:none;
+            border-radius:0.25rem;
+            min-width:11.625rem;
+            padding:0 2rem;
+            height:2.625rem;
+            font-weight:bold;
+            background-color:#FFD140;
+            color:#000000;
+            font-family:"Helvetica Neue",Arial,sans-serif;
+            font-size:1rem;
+            line-height:1.25rem;
+            cursor:pointer;
+        }
 
     </style>
 </head>
@@ -374,8 +391,13 @@
                     <span id="cart-total" class="text-primary">$0.00</span>
                 </div>
                 <div class="mt-6 space-y-3">
-                    <!-- PayPal Button Container -->
-                    <div id="paypal-button-container"></div>
+                    <div id="paypal-button-container">
+                        <form action="https://www.paypal.com/ncp/payment/M5L3H3WKUQ3H8" method="post" target="_blank" style="display:inline-grid;justify-items:center;align-content:start;gap:0.5rem;">
+                            <input class="pp-M5L3H3WKUQ3H8" type="submit" value="Pagar ahora" />
+                            <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="cards" />
+                            <section style="font-size: 0.75rem; color: var(--secondary-text);"> Con la tecnología de <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" style="height:0.875rem;vertical-align:middle;"/></section>
+                        </form>
+                    </div>
                     <button id="clear-cart-button" class="w-full bg-secondary/20 text-light font-bold py-3 px-6 rounded-full hover:bg-secondary/40 transition">
                         Vaciar Carrito
                     </button>
@@ -506,43 +528,11 @@
                 
                 cartTotalEl.textContent = `$${total.toFixed(2)}`;
                 cartCountEl.textContent = totalItems;
-                
-                // Render PayPal button with the correct total
-                renderPayPalButton(total);
             }
             
             function clearCart() {
                 cart = [];
                 renderCart();
-            }
-            
-            function renderPayPalButton(total) {
-                const container = document.getElementById('paypal-button-container');
-                container.innerHTML = ''; // Clear previous button
-                if (total > 0) {
-                    paypal.Buttons({
-                        createOrder: function(data, actions) {
-                            return actions.order.create({
-                                purchase_units: [{
-                                    amount: {
-                                        value: total.toFixed(2)
-                                    }
-                                }]
-                            });
-                        },
-                        onApprove: function(data, actions) {
-                            return actions.order.capture().then(function(details) {
-                                alert('¡Pago completado! Gracias, ' + details.payer.name.given_name);
-                                clearCart();
-                                cartModal.classList.add('opacity-0', 'pointer-events-none');
-                            });
-                        },
-                        onError: function(err) {
-                            console.error('Error de PayPal:', err);
-                            alert('Ocurrió un error con el pago. Por favor, inténtalo de nuevo.');
-                        }
-                    }).render('#paypal-button-container');
-                }
             }
 
             // --- Event Listeners ---
