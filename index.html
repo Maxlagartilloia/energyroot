@@ -374,16 +374,9 @@
                     <span id="cart-total" class="text-primary">$0.00</span>
                 </div>
                 <div class="mt-6 space-y-3">
-                    <!-- PayPal Buy Now Button Form -->
-                    <form action="https://www.paypal.com/ncp/payment/M5L3H3WKUQ3H8" method="post" target="_blank" class="w-full text-center">
-                        <button type="submit" class="w-full bg-yellow-400 text-black font-fierce py-3 px-6 rounded-full hover:bg-yellow-300 transition shadow-lg">
-                            Comprar ahora
-                        </button>
-                        <div class="mt-2">
-                            <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="Accepted cards" class="mx-auto h-6" />
-                            <p class="text-xs text-secondary mt-1"> Con la tecnología de <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" class="h-3 inline-block relative" style="top: 2px;"/></p>
-                        </div>
-                    </form>
+                    <button id="checkout-button" class="w-full bg-yellow-400 text-black font-fierce py-3 px-6 rounded-full hover:bg-yellow-300 transition shadow-lg">
+                        Comprar ahora
+                    </button>
                     <button id="clear-cart-button" class="w-full bg-secondary/20 text-light font-bold py-3 px-6 rounded-full hover:bg-secondary/40 transition">
                         Vaciar Carrito
                     </button>
@@ -471,10 +464,11 @@
             const cartCountEl = document.getElementById('cart-count');
             const emptyCartMessage = document.getElementById('empty-cart-message');
             const clearCartButton = document.getElementById('clear-cart-button');
+            const checkoutButton = document.getElementById('checkout-button');
 
             function addToCart(productId) {
-                const productToAdd = products.find(p => p.id === productId);
-                const existingItem = cart.find(item => item.id === productId);
+                const productToAdd = products.find(p => p.id === parseInt(productId));
+                const existingItem = cart.find(item => item.id === parseInt(productId));
 
                 if (existingItem) {
                     existingItem.quantity++;
@@ -487,6 +481,7 @@
             function renderCart() {
                 cartItemsContainer.innerHTML = '';
                 let total = 0;
+                let totalItems = 0;
                 
                 if (cart.length === 0) {
                     emptyCartMessage.style.display = 'block';
@@ -494,6 +489,7 @@
                     emptyCartMessage.style.display = 'none';
                     cart.forEach(item => {
                         total += item.price * item.quantity;
+                        totalItems += item.quantity;
                         const cartItem = document.createElement('div');
                         cartItem.className = 'flex justify-between items-center';
                         cartItem.innerHTML = `
@@ -511,19 +507,36 @@
                 }
                 
                 cartTotalEl.textContent = `$${total.toFixed(2)}`;
-                cartCountEl.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartCountEl.textContent = totalItems;
             }
             
             function clearCart() {
                 cart = [];
                 renderCart();
             }
+            
+            function handleCheckout() {
+                if (cart.length === 0) {
+                    alert("Tu carrito está vacío. Añade productos antes de comprar.");
+                    return;
+                }
+
+                let orderSummary = "¡Hola! Quiero realizar el siguiente pedido:\n";
+                cart.forEach(item => {
+                    orderSummary += `\n- ${item.quantity}x ${item.name}`;
+                });
+                orderSummary += `\n\n*Total: ${cartTotalEl.textContent}*`;
+                
+                const message = encodeURIComponent(orderSummary);
+                const phone = '593983637611';
+                window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+            }
 
             // --- Event Listeners ---
             productsContainer.addEventListener('click', (e) => {
                 if (e.target.closest('.add-to-cart-btn')) {
                     const button = e.target.closest('.add-to-cart-btn');
-                    const productId = parseInt(button.dataset.id);
+                    const productId = button.dataset.id;
                     addToCart(productId);
                 }
             });
@@ -539,6 +552,7 @@
             });
             
             clearCartButton.addEventListener('click', clearCart);
+            checkoutButton.addEventListener('click', handleCheckout);
 
             // --- Mobile Menu Toggle ---
             const mobileMenuButton = document.getElementById('mobile-menu-button');
