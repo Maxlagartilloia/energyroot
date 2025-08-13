@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Energyroot - Energía Natural de Malanga</title>
     
-    <!-- PayPal SDK -->
-    <script 
-      src="https://www.paypal.com/sdk/js?client-id=BAA8BBT5N3vjuSthUSXQZZh9IPm_zaRRUe3084VpaA1yt7NcmSuBf984B1eWjFxvDhKsMHzK_zPYyIvMBw&components=hosted-buttons&disable-funding=venmo&currency=USD">
-    </script>
-
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -379,16 +374,8 @@
                     <span id="cart-total" class="text-primary">$0.00</span>
                 </div>
                 <div class="mt-6 space-y-3">
-                    <!-- PayPal Buy Now Button Form -->
-                    <form action="https://www.paypal.com/ncp/payment/M5L3H3WKUQ3H8" method="post" target="_blank" class="w-full text-center">
-                        <button type="submit" class="w-full bg-yellow-400 text-black font-fierce py-3 px-6 rounded-full hover:bg-yellow-300 transition shadow-lg">
-                            Comprar ahora
-                        </button>
-                        <div class="mt-2">
-                            <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="Accepted cards" class="mx-auto h-6" />
-                            <p class="text-xs text-secondary mt-1"> Con la tecnología de <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" class="h-3 inline-block relative" style="top: 2px;"/></p>
-                        </div>
-                    </form>
+                    <!-- PayPal Button Container -->
+                    <div id="paypal-button-container"></div>
                     <button id="clear-cart-button" class="w-full bg-secondary/20 text-light font-bold py-3 px-6 rounded-full hover:bg-secondary/40 transition">
                         Vaciar Carrito
                     </button>
@@ -519,11 +506,43 @@
                 
                 cartTotalEl.textContent = `$${total.toFixed(2)}`;
                 cartCountEl.textContent = totalItems;
+                
+                // Render PayPal button with the correct total
+                renderPayPalButton(total);
             }
             
             function clearCart() {
                 cart = [];
                 renderCart();
+            }
+            
+            function renderPayPalButton(total) {
+                const container = document.getElementById('paypal-button-container');
+                container.innerHTML = ''; // Clear previous button
+                if (total > 0) {
+                    paypal.Buttons({
+                        createOrder: function(data, actions) {
+                            return actions.order.create({
+                                purchase_units: [{
+                                    amount: {
+                                        value: total.toFixed(2)
+                                    }
+                                }]
+                            });
+                        },
+                        onApprove: function(data, actions) {
+                            return actions.order.capture().then(function(details) {
+                                alert('¡Pago completado! Gracias, ' + details.payer.name.given_name);
+                                clearCart();
+                                cartModal.classList.add('opacity-0', 'pointer-events-none');
+                            });
+                        },
+                        onError: function(err) {
+                            console.error('Error de PayPal:', err);
+                            alert('Ocurrió un error con el pago. Por favor, inténtalo de nuevo.');
+                        }
+                    }).render('#paypal-button-container');
+                }
             }
 
             // --- Event Listeners ---
