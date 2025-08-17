@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Energyroot - Energía Natural de Malanga</title>
 
-  <!-- PayPal SDK (Buttons dinámicos) -->
+  <!-- PayPal SDK (Smart Buttons dinámicos) -->
   <script
     src="https://www.paypal.com/sdk/js?client-id=BAA8BBT5N3vjuSthUSXQZZh9IPm_zaRRUe3084VpaA1yt7NcmSuBf984B1eWjFxvDhKsMHzK_zPYyIvMBw&components=buttons&disable-funding=venmo&currency=USD"
     crossorigin="anonymous"
@@ -65,13 +65,13 @@
 
     .qty-btn{ background:var(--primary-blue); color:var(--dark-bg); width:24px; height:24px; border-radius:50%; font-weight:bold; cursor:pointer; }
 
-    /* Colores del branding usados en el HTML */
+    /* Branding */
     .bg-accent-orange{ background:var(--accent-orange) !important; }
     .bg-navy-blue{ background:var(--navy-blue) !important; }
     #cart-button{ color:#fff !important; border:none !important; }
     #cart-button:hover{ filter:brightness(0.95); }
 
-    /* Modal: asegurar X visible sobre iframe de PayPal y cierres cómodos */
+    /* Modal */
     .modal-container{ position:relative; }
     #close-modal-button{ z-index:9999 !important; color:#ffffff !important; line-height:1; }
     #paypal-button-container{ position:relative; z-index:1; }
@@ -281,7 +281,7 @@
       });
     }
 
-    // --- Carrito ---
+    // --- Carrito & Modal ---
     const cartButton = document.getElementById('cart-button');
     const cartModal = document.getElementById('cart-modal');
     const closeModalButton = document.getElementById('close-modal-button');
@@ -345,45 +345,65 @@
       }
       cartTotalEl.textContent = `$${total.toFixed(2)}`;
       cartCountEl.textContent = totalItems;
-
-      // Render PayPal botón dinámico con total + items
-      renderPayPalButton(total);
+      renderPayPalButton(total); // <— pinta/repinta PayPal con el total actual
     }
 
     function clearCart(){ cart=[]; renderCart(); }
 
-    // PayPal dinámico
+    // --- PayPal: evita errores de decimales y cierra modal ---
+    function moneyToCents(n){ return Math.round(Number(n) * 100); }
+    function centsToMoney(c){ return (c/100).toFixed(2); }
+
     function renderPayPalButton(total){
       const container = document.getElementById('paypal-button-container');
       container.innerHTML='';
       if(total<=0 || !window.paypal) return;
 
-      const items = cart.map(it=>({
-        name: it.name,
-        unit_amount:{ currency_code:'USD', value: it.price.toFixed(2) },
-        quantity: String(it.quantity)
-      }));
+      const items = cart.map(it=>{
+        const unitCents = moneyToCents(it.price);
+        return {
+          name: it.name,
+          unit_amount:{ currency_code:'USD', value: centsToMoney(unitCents) },
+          quantity: String(it.quantity)
+        };
+      });
+
+      const itemsTotalCents = cart.reduce((acc,it)=> acc + moneyToCents(it.price)*it.quantity, 0);
+      const grandTotal = centsToMoney(itemsTotalCents);
 
       paypal.Buttons({
         style:{ layout:'vertical', color:'gold', shape:'pill', label:'paypal' },
+
+        onClick:()=>{
+          if(!cart.length || itemsTotalCents<=0){
+            alert('Tu carrito está vacío.');
+            throw new Error('EMPTY_CART');
+          }
+        },
+
         createOrder:(data,actions)=>actions.order.create({
+          intent:'CAPTURE',
           purchase_units:[{
             description:'Compra Energyroot',
             amount:{
               currency_code:'USD',
-              value: total.toFixed(2),
-              breakdown:{ item_total:{ currency_code:'USD', value: total.toFixed(2) } }
+              value: grandTotal,
+              breakdown:{ item_total:{ currency_code:'USD', value: grandTotal } }
             },
             items
-          }]
+          }],
+          application_context:{ shipping_preference:'NO_SHIPPING' }
         }),
+
         onApprove:(data,actions)=>actions.order.capture().then(details=>{
           alert('¡Pago completado! Gracias, ' + (details?.payer?.name?.given_name || 'cliente'));
           clearCart();
           closeCartModal(); // autocierre
+          console.log('CAPTURE DETAILS:', details);
         }),
-        onCancel:()=>console.warn('Pago cancelado'),
-        onError:(err)=>{ console.error('Error PayPal:',err); alert('Ocurrió un error con el pago. Intenta de nuevo.'); }
+
+        onCancel:()=>{ console.warn('Pago cancelado'); closeCartModal(); },
+        onError:(err)=>{ console.error('PayPal onError:', err); alert('Ocurrió un error con el pago. Intenta de nuevo.'); }
       }).render('#paypal-button-container');
     }
 
