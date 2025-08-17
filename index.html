@@ -5,78 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Energyroot - Energía Natural de Malanga</title>
 
-  <!-- PayPal SDK (Smart Buttons dinámicos) -->
+  <!-- PayPal SDK: Smart Buttons + Hosted Buttons (para fallback) -->
   <script
-    src="https://www.paypal.com/sdk/js?client-id=BAA8BBT5N3vjuSthUSXQZZh9IPm_zaRRUe3084VpaA1yt7NcmSuBf984B1eWjFxvDhKsMHzK_zPYyIvMBw&components=buttons&disable-funding=venmo&currency=USD"
-    crossorigin="anonymous"
-    async>
+    src="https://www.paypal.com/sdk/js?client-id=BAA8BBT5N3vjuSthUSXQZZh9IPm_zaRRUe3084VpaA1yt7NcmSuBf984B1eWjFxvDhKsMHzK_zPYyIvMBw&components=buttons,hosted-buttons&disable-funding=venmo&currency=USD"
+    crossorigin="anonymous" async>
   </script>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Fonts -->
+  <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Russo+One&display=swap" rel="stylesheet">
-
-  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
-    body { font-family:'Inter',sans-serif; background:#121212; cursor:none; }
+    body{font-family:'Inter',sans-serif;background:#121212;cursor:none}
     :root{
       --primary-blue:#00BFFF; --accent-orange:#FF6700; --navy-blue:#001F3F;
       --dark-bg:#121212; --card-bg:#1A1A1A; --light-text:#FFFFFF; --secondary-text:#A0A0A0; --header-text:#023E8A;
     }
-    .font-fierce{ font-family:'Russo One',sans-serif; text-transform:uppercase; letter-spacing:.05em; }
+    .font-fierce{font-family:'Russo One',sans-serif;text-transform:uppercase;letter-spacing:.05em}
+    .hero-section{position:relative;overflow:hidden;height:100vh}
+    .video-background{position:absolute;top:50%;left:50%;width:150%;height:150%;object-fit:cover;transform:translate(-50%,-50%);z-index:1;pointer-events:none}
+    .hero-overlay{position:relative;z-index:2;background:linear-gradient(to top,rgba(18,18,18,1)0%,rgba(18,18,18,.8)50%,rgba(18,18,18,0)100%);height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+    .btn-primary{background:var(--primary-blue);color:var(--dark-bg);transition:all .3s;box-shadow:0 0 15px rgba(0,191,255,.5)}
+    .btn-primary:hover{transform:scale(1.05);box-shadow:0 0 25px rgba(0,191,255,.8)}
+    .text-primary{color:var(--primary-blue)} .text-secondary{color:var(--secondary-text)} .text-light{color:var(--light-text)}
+    .bg-dark{background:var(--dark-bg)} .bg-card{background:var(--card-bg)}
+    .nav-link{position:relative;transition:color .3s;color:var(--header-text)}
+    .nav-link::after{content:'';position:absolute;width:0;height:2px;bottom:-5px;left:50%;transform:translateX(-50%);background:var(--accent-orange);transition:width .3s}
+    .nav-link:hover{color:var(--accent-orange)} .nav-link:hover::after{width:100%}
+    .product-card{transition:transform .3s,box-shadow .3s}
+    .product-card:hover{transform:scale(1.05);box-shadow:0 10px 30px rgba(0,191,255,.3)}
+    #sparks-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:9999;pointer-events:none}
 
-    .hero-section{ position:relative; overflow:hidden; height:100vh; }
-    .video-background{ position:absolute; top:50%; left:50%; width:150%; height:150%; object-fit:cover; transform:translate(-50%,-50%); z-index:1; pointer-events:none; }
-    .hero-overlay{ position:relative; z-index:2; background:linear-gradient(to top, rgba(18,18,18,1) 0%, rgba(18,18,18,.8) 50%, rgba(18,18,18,0) 100%); height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
+    /* WhatsApp */
+    .whatsapp-container{position:fixed;bottom:2rem;right:2rem;z-index:1000}
+    .whatsapp-window{position:absolute;bottom:calc(100% + 1rem);right:0;width:350px;max-width:calc(100vw - 4rem);background:#252D36;border-radius:1rem;box-shadow:0 10px 30px rgba(0,0,0,.5);overflow:hidden;opacity:0;transform:translateY(20px);transition:opacity .3s,transform .3s;pointer-events:none}
+    .whatsapp-window.open{opacity:1;transform:translateY(0);pointer-events:auto}
+    .whatsapp-header{background:var(--navy-blue);color:#fff;padding:1rem;display:flex;align-items:center;gap:.75rem}
+    .whatsapp-operator-img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #fff}
+    .whatsapp-body{padding:1rem;background-image:url('https://i.pinimg.com/736x/8c/98/99/8c98994518b575bfd8c949e91d20548b.jpg');background-size:contain}
+    .whatsapp-message{background:#182229;color:#fff;padding:.75rem;border-radius:.5rem;max-width:80%;margin-bottom:1rem}
+    .whatsapp-reply{background:#2C3A47;border:1px solid var(--primary-blue);color:var(--primary-blue);padding:.75rem;border-radius:9999px;text-align:center;cursor:pointer;transition:background-color .2s}
+    .whatsapp-reply:hover{background:rgba(0,191,255,.2)}
+    .whatsapp-button{padding:.75rem 1.5rem;background:var(--navy-blue);border-radius:9999px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;box-shadow:0 4px 15px rgba(0,31,63,.4);transition:transform .2s;cursor:pointer}
+    .whatsapp-button:hover{transform:scale(1.05)}
 
-    .btn-primary{ background:var(--primary-blue); color:var(--dark-bg); transition:all .3s ease; box-shadow:0 0 15px rgba(0,191,255,.5); }
-    .btn-primary:hover{ transform:scale(1.05); box-shadow:0 0 25px rgba(0,191,255,.8); }
+    .qty-btn{background:var(--primary-blue);color:var(--dark-bg);width:24px;height:24px;border-radius:50%;font-weight:bold;cursor:pointer}
 
-    .text-primary{ color:var(--primary-blue);} .text-secondary{ color:var(--secondary-text);} .text-light{ color:var(--light-text);}
-    .bg-dark{ background:var(--dark-bg);} .bg-card{ background:var(--card-bg);}
-
-    .nav-link{ position:relative; transition:color .3s ease; color:var(--header-text);}
-    .nav-link::after{ content:''; position:absolute; width:0; height:2px; bottom:-5px; left:50%; transform:translateX(-50%); background:var(--accent-orange); transition:width .3s ease;}
-    .nav-link:hover{ color:var(--accent-orange);} .nav-link:hover::after{ width:100%; }
-
-    .product-card{ transition:transform .3s ease, box-shadow .3s ease;}
-    .product-card:hover{ transform:scale(1.05); box-shadow:0 10px 30px rgba(0,191,255,.3);}
-
-    #sparks-canvas{ position:fixed; inset:0; width:100%; height:100%; z-index:9999; pointer-events:none; }
-
-    .whatsapp-container{ position:fixed; bottom:2rem; right:2rem; z-index:1000; }
-    .whatsapp-window{ position:absolute; bottom:calc(100% + 1rem); right:0; width:350px; max-width:calc(100vw - 4rem); background:#252D36; border-radius:1rem; box-shadow:0 10px 30px rgba(0,0,0,.5); overflow:hidden; opacity:0; transform:translateY(20px); transition:opacity .3s ease, transform .3s ease; pointer-events:none; }
-    .whatsapp-window.open{ opacity:1; transform:translateY(0); pointer-events:auto; }
-    .whatsapp-header{ background:var(--navy-blue); color:#fff; padding:1rem; display:flex; align-items:center; gap:.75rem; }
-    .whatsapp-operator-img{ width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #fff; }
-    .whatsapp-body{ padding:1rem; background-image:url('https://i.pinimg.com/736x/8c/98/99/8c98994518b575bfd8c949e91d20548b.jpg'); background-size:contain; }
-    .whatsapp-message{ background:#182229; color:#fff; padding:.75rem; border-radius:.5rem; max-width:80%; margin-bottom:1rem; }
-    .whatsapp-replies{ display:flex; flex-direction:column; gap:.5rem; margin-top:1rem; }
-    .whatsapp-reply{ background:#2C3A47; border:1px solid var(--primary-blue); color:var(--primary-blue); padding:.75rem; border-radius:9999px; text-align:center; cursor:pointer; transition:background-color .2s; }
-    .whatsapp-reply:hover{ background:rgba(0,191,255,.2); }
-    .whatsapp-button{ padding:.75rem 1.5rem; background:var(--navy-blue); border-radius:9999px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.25rem; box-shadow:0 4px 15px rgba(0,31,63,.4); transition:transform .2s ease; cursor:pointer; }
-    .whatsapp-button:hover{ transform:scale(1.05); }
-
-    .qty-btn{ background:var(--primary-blue); color:var(--dark-bg); width:24px; height:24px; border-radius:50%; font-weight:bold; cursor:pointer; }
-
-    /* Branding */
-    .bg-accent-orange{ background:var(--accent-orange) !important; }
-    .bg-navy-blue{ background:var(--navy-blue) !important; }
-    #cart-button{ color:#fff !important; border:none !important; }
-    #cart-button:hover{ filter:brightness(0.95); }
+    /* Branding botón carrito */
+    .bg-accent-orange{background:var(--accent-orange)!important}
+    .bg-navy-blue{background:var(--navy-blue)!important}
+    #cart-button{color:#fff!important;border:none!important}
+    #cart-button:hover{filter:brightness(0.95)}
 
     /* Modal */
-    .modal-container{ position:relative; }
-    #close-modal-button{ z-index:9999 !important; color:#ffffff !important; line-height:1; }
-    #paypal-button-container{ position:relative; z-index:1; }
-    #cart-modal{ cursor:pointer; }
-    #cart-modal .modal-container{ cursor:auto; }
+    .modal-container{position:relative}
+    #close-modal-button{z-index:9999!important;color:#fff!important;line-height:1}
+    #paypal-button-container{position:relative;z-index:1}
+    #cart-modal{cursor:pointer}
+    #cart-modal .modal-container{cursor:auto}
   </style>
 </head>
 <body class="bg-dark text-light">
@@ -117,12 +108,8 @@
         frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
       <div class="hero-overlay">
         <div class="w-full text-center text-white pb-20">
-          <h2 class="text-3xl md:text-4xl font-black leading-tight mb-8 px-6 font-fierce text-shadow-lg shadow-black">
-            La Verdadera Fuerza de la Naturaleza
-          </h2>
-          <a href="#productos" class="btn-primary font-fierce text-xl py-4 px-10 rounded-full inline-block shadow-lg">
-            Conoce Nuestros Productos
-          </a>
+          <h2 class="text-3xl md:text-4xl font-black leading-tight mb-8 px-6 font-fierce">La Verdadera Fuerza de la Naturaleza</h2>
+          <a href="#productos" class="btn-primary font-fierce text-xl py-4 px-10 rounded-full inline-block shadow-lg">Conoce Nuestros Productos</a>
         </div>
       </div>
     </section>
@@ -243,7 +230,7 @@
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // --- Productos ---
+    /* -------------------- DATA -------------------- */
     const products = [
       { id:1, name:'Malanga Power Original', price:3.75, image:'https://i.postimg.cc/pdNJrJ9H/Chat-GPT-Image-12-ago-2025-23-06-50-removebg-preview.png', description:'Energía sostenida sin estimulantes artificiales. Sabor neutro y ligero.', presentation:'Botella 500 ml', audience:'Deportistas, estudiantes' },
       { id:2, name:'Malanga Power + Frutas Tropicales', price:3.75, image:'https://i.postimg.cc/k4mqXzFd/Chat-GPT-Image-12-ago-2025-23-30-10-removebg-preview.png', description:'Mezcla de malanga, maracuyá y piña. Energía que refresca.', presentation:'Botella 350 ml', audience:'Jóvenes, funcionales' },
@@ -251,10 +238,10 @@
       { id:4, name:'Malanga Power Sport', price:3.75, image:'https://i.postimg.cc/hv4nVm5y/Chat-GPT-Image-12-ago-2025__23_30_03-removebg-preview.png', description:'Con electrolitos y vitaminas B para una recuperación óptima.', presentation:'Botella 600 ml', audience:'Atletas, activos' },
       { id:5, name:'Malanga Power Shot', price:3.75, image:'https://i.postimg.cc/HL5TmdM2/ChatGPT_Image_12_ago_2025__23_30_01-removebg-preview.png', description:'Impulso concentrado de energía con absorción rápida.', presentation:'Shot 60 ml', audience:'Profesionales, conductores' }
     ];
-
     const productsContainer = document.querySelector('#productos .grid');
     let cart = [];
 
+    /* -------------------- RENDER PRODUCTS -------------------- */
     function renderProducts(){
       productsContainer.innerHTML='';
       products.forEach(p=>{
@@ -281,7 +268,7 @@
       });
     }
 
-    // --- Carrito & Modal ---
+    /* -------------------- CART & MODAL -------------------- */
     const cartButton = document.getElementById('cart-button');
     const cartModal = document.getElementById('cart-modal');
     const closeModalButton = document.getElementById('close-modal-button');
@@ -318,163 +305,4 @@
     function renderCart(){
       cartItemsContainer.innerHTML='';
       let total=0, totalItems=0;
-      if(cart.length===0){
-        emptyCartMessage.style.display='block';
-      }else{
-        emptyCartMessage.style.display='none';
-        cart.forEach(item=>{
-          total += item.price*item.quantity;
-          totalItems += item.quantity;
-          const el = document.createElement('div');
-          el.className='flex justify-between items-center';
-          el.innerHTML = `
-            <div class="flex items-center gap-3">
-              <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-contain rounded-md bg-dark">
-              <div>
-                <h4 class="font-semibold text-light">${item.name}</h4>
-                <div class="flex items-center gap-2 mt-1">
-                  <button class="qty-btn decrease-qty" data-id="${item.id}">-</button>
-                  <span class="text-light">${item.quantity}</span>
-                  <button class="qty-btn increase-qty" data-id="${item.id}">+</button>
-                </div>
-              </div>
-            </div>
-            <span class="font-bold text-lg text-primary">$${(item.price*item.quantity).toFixed(2)}</span>`;
-          cartItemsContainer.appendChild(el);
-        });
-      }
-      cartTotalEl.textContent = `$${total.toFixed(2)}`;
-      cartCountEl.textContent = totalItems;
-      renderPayPalButton(total); // <— pinta/repinta PayPal con el total actual
-    }
-
-    function clearCart(){ cart=[]; renderCart(); }
-
-    // --- PayPal: evita errores de decimales y cierra modal ---
-    function moneyToCents(n){ return Math.round(Number(n) * 100); }
-    function centsToMoney(c){ return (c/100).toFixed(2); }
-
-    function renderPayPalButton(total){
-      const container = document.getElementById('paypal-button-container');
-      container.innerHTML='';
-      if(total<=0 || !window.paypal) return;
-
-      const items = cart.map(it=>{
-        const unitCents = moneyToCents(it.price);
-        return {
-          name: it.name,
-          unit_amount:{ currency_code:'USD', value: centsToMoney(unitCents) },
-          quantity: String(it.quantity)
-        };
-      });
-
-      const itemsTotalCents = cart.reduce((acc,it)=> acc + moneyToCents(it.price)*it.quantity, 0);
-      const grandTotal = centsToMoney(itemsTotalCents);
-
-      paypal.Buttons({
-        style:{ layout:'vertical', color:'gold', shape:'pill', label:'paypal' },
-
-        onClick:()=>{
-          if(!cart.length || itemsTotalCents<=0){
-            alert('Tu carrito está vacío.');
-            throw new Error('EMPTY_CART');
-          }
-        },
-
-        createOrder:(data,actions)=>actions.order.create({
-          intent:'CAPTURE',
-          purchase_units:[{
-            description:'Compra Energyroot',
-            amount:{
-              currency_code:'USD',
-              value: grandTotal,
-              breakdown:{ item_total:{ currency_code:'USD', value: grandTotal } }
-            },
-            items
-          }],
-          application_context:{ shipping_preference:'NO_SHIPPING' }
-        }),
-
-        onApprove:(data,actions)=>actions.order.capture().then(details=>{
-          alert('¡Pago completado! Gracias, ' + (details?.payer?.name?.given_name || 'cliente'));
-          clearCart();
-          closeCartModal(); // autocierre
-          console.log('CAPTURE DETAILS:', details);
-        }),
-
-        onCancel:()=>{ console.warn('Pago cancelado'); closeCartModal(); },
-        onError:(err)=>{ console.error('PayPal onError:', err); alert('Ocurrió un error con el pago. Intenta de nuevo.'); }
-      }).render('#paypal-button-container');
-    }
-
-    // Eventos UI
-    productsContainer.addEventListener('click', e=>{
-      const btn = e.target.closest('.add-to-cart-btn'); if(!btn) return;
-      addToCart(btn.dataset.id);
-    });
-    cartItemsContainer.addEventListener('click', e=>{
-      const id = e.target.dataset.id; if(!id) return;
-      const item = cart.find(i=>i.id===parseInt(id)); if(!item) return;
-      if(e.target.classList.contains('increase-qty')) updateQuantity(id, item.quantity+1);
-      if(e.target.classList.contains('decrease-qty')) updateQuantity(id, item.quantity-1);
-    });
-
-    cartButton.addEventListener('click', openCartModal);
-    closeModalButton.addEventListener('click', closeCartModal);
-    document.getElementById('cart-modal').addEventListener('click', e=>{ if(e.target.id==='cart-modal') closeCartModal(); });
-    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeCartModal(); });
-    clearCartButton.addEventListener('click', clearCart);
-
-    // Mobile menu
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-    const mobileMenu = document.getElementById('mobile-menu');
-    mobileMenuButton.addEventListener('click', ()=> mobileMenu.classList.toggle('hidden'));
-
-    // Sparks
-    const canvas=document.getElementById('sparks-canvas'); const ctx=canvas.getContext('2d');
-    canvas.width=window.innerWidth; canvas.height=window.innerHeight; let particles=[];
-    const mouse={ x:undefined, y:undefined };
-    window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; for(let i=0;i<3;i++) particles.push(new Particle()); });
-    class Particle{ constructor(){ this.x=mouse.x; this.y=mouse.y; this.size=Math.random()*2+1; this.speedX=Math.random()*3-1.5; this.speedY=Math.random()*3-1.5; this.color=`hsl(195, 100%, ${Math.random()*50+50}%)`; this.life=100; }
-      update(){ this.x+=this.speedX; this.y+=this.speedY; if(this.size>0.1) this.size-=0.03; this.life--; }
-      draw(){ ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
-    }
-    function handleParticles(){ for(let i=0;i<particles.length;i++){ particles[i].update(); particles[i].draw(); if(particles[i].size<=0.1||particles[i].life<=0){ particles.splice(i,1); i--; } } }
-    (function animate(){ ctx.clearRect(0,0,canvas.width,canvas.height); handleParticles(); requestAnimationFrame(animate); })();
-    window.addEventListener('resize', ()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
-
-    // Form contacto
-    const contactForm=document.getElementById('contact-form');
-    contactForm.addEventListener('submit', e=>{
-      e.preventDefault();
-      const name=document.getElementById('name').value;
-      const email=document.getElementById('email').value;
-      const countryCode=document.getElementById('country-code').value;
-      const phone=document.getElementById('phone').value;
-      const message=document.getElementById('message').value;
-      const subject=`Nuevo Mensaje de Contacto de: ${name}`;
-      const body=`Nombre: ${name}%0D%0ACorreo: ${email}%0D%0ATeléfono: ${countryCode} ${phone}%0D%0A%0D%0AMensaje:%0D%0A${message}`;
-      window.location.href=`mailto:energyrootec@gmail.com?subject=${subject}&body=${body}`;
-    });
-
-    // Códigos de país
-    const countryCodes=[{name:'Ecuador',code:'+593'},{name:'Colombia',code:'+57'},{name:'Perú',code:'+51'},{name:'EE.UU.',code:'+1'},{name:'España',code:'+34'}];
-    const select=document.getElementById('country-code');
-    countryCodes.forEach(c=>{ const o=document.createElement('option'); o.value=c.code; o.textContent=`${c.name} (${c.code})`; if(c.code==='+593') o.selected=true; select.appendChild(o); });
-
-    // WhatsApp widget
-    const whatsappWindow=document.getElementById('whatsapp-window');
-    const whatsappButton=document.getElementById('whatsapp-button');
-    whatsappButton.addEventListener('click',e=>{ e.stopPropagation(); whatsappWindow.classList.toggle('open'); });
-    document.addEventListener('click',e=>{ if(!whatsappWindow.contains(e.target)&&!whatsappButton.contains(e.target)) whatsappWindow.classList.remove('open'); });
-    document.querySelectorAll('.whatsapp-reply').forEach(r=>{
-      r.addEventListener('click',()=>{ const message=encodeURIComponent(r.getAttribute('data-message')); const phone='593983637611'; window.open(`https://wa.me/${phone}?text=${message}`,'_blank'); });
-    });
-
-    // Init
-    renderProducts();
-    renderCart();
-  });
-  </script>
-</body>
-</html>
+      if(cart.length===0
