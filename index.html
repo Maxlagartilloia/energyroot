@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Energyroot - Energía Natural de Malanga</title>
     
+    <!-- PayPal SDK -->
+    <script 
+      src="https://www.paypal.com/sdk/js?client-id=BAA8BBT5N3vjuSthUSXQZZh9IPm_zaRRUe3084VpaA1yt7NcmSuBf984B1eWjFxvDhKsMHzK_zPYyIvMBw&components=buttons&disable-funding=venmo&currency=USD">
+    </script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -221,21 +226,15 @@
             transform: scale(1.05);
         }
         
-        /* PayPal Button from user */
-        .pp-M5L3H3WKUQ3H8{
-            text-align:center;
-            border:none;
-            border-radius:0.25rem;
-            min-width:11.625rem;
-            padding:0 2rem;
-            height:2.625rem;
-            font-weight:bold;
-            background-color:#FFD140;
-            color:#000000;
-            font-family:"Helvetica Neue",Arial,sans-serif;
-            font-size:1rem;
-            line-height:1.25rem;
-            cursor:pointer;
+        /* Cart Quantity Controls */
+        .qty-btn {
+            background-color: var(--primary-blue);
+            color: var(--dark-bg);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
         }
 
     </style>
@@ -259,7 +258,7 @@
             <div class="flex items-center gap-4">
                  <button id="cart-button" class="text-3xl hover:text-accent-orange transition relative" style="color: var(--header-text);">
                     <i class="fa-solid fa-cart-shopping"></i>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-accent-orange text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">0</span>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-accent-orange text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">0</span>
                 </button>
                 <button id="mobile-menu-button" class="md:hidden text-3xl" style="color: var(--header-text);">
                     <i class="fa-solid fa-bars"></i>
@@ -370,7 +369,7 @@
             <p>&copy; 2025 Energyroot. Todos los derechos reservados.</p>
             <p class="text-sm text-secondary">Santo Domingo, Ecuador</p>
             <div class="flex justify-center space-x-6 mt-4">
-                <a href="#" class="text-secondary hover:text-primary text-2xl transition"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=61579166804504" target="_blank" class="text-secondary hover:text-primary text-2xl transition"><i class="fa-brands fa-facebook-f"></i></a>
                 <a href="#" class="text-secondary hover:text-primary text-2xl transition"><i class="fa-brands fa-instagram"></i></a>
                 <a href="#" class="text-secondary hover:text-primary text-2xl transition"><i class="fa-brands fa-tiktok"></i></a>
             </div>
@@ -391,13 +390,7 @@
                     <span id="cart-total" class="text-primary">$0.00</span>
                 </div>
                 <div class="mt-6 space-y-3">
-                    <div id="paypal-button-container">
-                        <form action="https://www.paypal.com/ncp/payment/M5L3H3WKUQ3H8" method="post" target="_blank" style="display:inline-grid;justify-items:center;align-content:start;gap:0.5rem;">
-                            <input class="pp-M5L3H3WKUQ3H8" type="submit" value="Pagar ahora" />
-                            <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="cards" />
-                            <section style="font-size: 0.75rem; color: var(--secondary-text);"> Con la tecnología de <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" style="height:0.875rem;vertical-align:middle;"/></section>
-                        </form>
-                    </div>
+                    <div id="paypal-button-container"></div>
                     <button id="clear-cart-button" class="w-full bg-secondary/20 text-light font-bold py-3 px-6 rounded-full hover:bg-secondary/40 transition">
                         Vaciar Carrito
                     </button>
@@ -497,6 +490,18 @@
                 }
                 renderCart();
             }
+            
+            function updateQuantity(productId, newQuantity) {
+                const itemInCart = cart.find(item => item.id === parseInt(productId));
+                if (itemInCart) {
+                    if (newQuantity > 0) {
+                        itemInCart.quantity = newQuantity;
+                    } else {
+                        cart = cart.filter(item => item.id !== parseInt(productId));
+                    }
+                }
+                renderCart();
+            }
 
             function renderCart() {
                 cartItemsContainer.innerHTML = '';
@@ -517,7 +522,11 @@
                                 <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-contain rounded-md bg-dark">
                                 <div>
                                     <h4 class="font-semibold text-light">${item.name}</h4>
-                                    <p class="text-sm text-secondary">$${item.price.toFixed(2)} x ${item.quantity}</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <button class="qty-btn decrease-qty" data-id="${item.id}">-</button>
+                                        <span class="text-light">${item.quantity}</span>
+                                        <button class="qty-btn increase-qty" data-id="${item.id}">+</button>
+                                    </div>
                                 </div>
                             </div>
                             <span class="font-bold text-lg text-primary">$${(item.price * item.quantity).toFixed(2)}</span>
@@ -528,11 +537,42 @@
                 
                 cartTotalEl.textContent = `$${total.toFixed(2)}`;
                 cartCountEl.textContent = totalItems;
+                
+                renderPayPalButton(total);
             }
             
             function clearCart() {
                 cart = [];
                 renderCart();
+            }
+            
+            function renderPayPalButton(total) {
+                const container = document.getElementById('paypal-button-container');
+                container.innerHTML = ''; // Clear previous button
+                if (total > 0) {
+                    paypal.Buttons({
+                        createOrder: function(data, actions) {
+                            return actions.order.create({
+                                purchase_units: [{
+                                    amount: {
+                                        value: total.toFixed(2)
+                                    }
+                                }]
+                            });
+                        },
+                        onApprove: function(data, actions) {
+                            return actions.order.capture().then(function(details) {
+                                alert('¡Pago completado! Gracias, ' + details.payer.name.given_name);
+                                clearCart();
+                                cartModal.classList.add('opacity-0', 'pointer-events-none');
+                            });
+                        },
+                        onError: function(err) {
+                            console.error('Error de PayPal:', err);
+                            alert('Ocurrió un error con el pago. Por favor, inténtalo de nuevo.');
+                        }
+                    }).render('#paypal-button-container');
+                }
             }
 
             // --- Event Listeners ---
@@ -541,6 +581,21 @@
                     const button = e.target.closest('.add-to-cart-btn');
                     const productId = button.dataset.id;
                     addToCart(productId);
+                }
+            });
+            
+            cartItemsContainer.addEventListener('click', (e) => {
+                const target = e.target;
+                const productId = target.dataset.id;
+                if (!productId) return;
+                
+                const item = cart.find(i => i.id === parseInt(productId));
+                if (!item) return;
+
+                if (target.classList.contains('increase-qty')) {
+                    updateQuantity(productId, item.quantity + 1);
+                } else if (target.classList.contains('decrease-qty')) {
+                    updateQuantity(productId, item.quantity - 1);
                 }
             });
             
@@ -675,11 +730,6 @@
             const whatsappWindow = document.getElementById('whatsapp-window');
             const whatsappButton = document.getElementById('whatsapp-button');
             
-            // Open automatically after 2 seconds
-            setTimeout(() => {
-                whatsappWindow.classList.add('open');
-            }, 2000);
-
             // Toggle on button click
             whatsappButton.addEventListener('click', (e) => {
                 e.stopPropagation();
