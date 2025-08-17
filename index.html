@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Energyroot - Energía Natural de Malanga</title>
     
+    <!-- PayPal SDK (Hosted Buttons + Buttons) -->
+    <script 
+      src="https://www.paypal.com/sdk/js?client-id=BAA8BBT5N3vjuSthUSXQZZh9IPm_zaRRUe3084VpaA1yt7NcmSuBf984B1eWjFxvDhKsMHzK_zPYyIvMBw&components=hosted-buttons,buttons&disable-funding=venmo&currency=USD"
+      crossorigin="anonymous"
+      async>
+    </script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -232,6 +239,14 @@
             cursor: pointer;
         }
 
+        /* Colores de marca para que el botón no “desaparezca” */
+        .bg-accent-orange { background-color: var(--accent-orange) !important; }
+        .bg-navy-blue     { background-color: var(--navy-blue) !important; }
+
+        /* Botón Carrito: texto visible + buen contraste */
+        #cart-button { color: #ffffff !important; border: none !important; }
+        #cart-button:hover { filter: brightness(0.95); }
+
     </style>
 </head>
 <body class="bg-dark text-light">
@@ -251,9 +266,10 @@
                 <a href="#contacto" class="nav-link font-fierce text-lg">Contáctanos</a>
             </div>
             <div class="flex items-center gap-4">
-                 <button id="cart-button" class="text-3xl hover:text-accent-orange transition relative" style="color: var(--header-text);">
+                 <button id="cart-button" class="bg-accent-orange text-white font-fierce px-4 py-2 rounded-full flex items-center gap-2">
                     <i class="fa-solid fa-cart-shopping"></i>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-accent-orange text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">0</span>
+                    <span class="hidden sm:inline">Carrito</span>
+                    <span id="cart-count" class="bg-navy-blue text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">0</span>
                 </button>
                 <button id="mobile-menu-button" class="md:hidden text-3xl" style="color: var(--header-text);">
                     <i class="fa-solid fa-bars"></i>
@@ -385,7 +401,8 @@
                     <span id="cart-total" class="text-primary">$0.00</span>
                 </div>
                 <div class="mt-6 space-y-3">
-                    <div id="paypal-button-container"></div>
+                    <!-- PayPal Hosted Button -->
+                    <div id="paypal-container-M5L3H3WKUQ3H8"></div>
                     <button id="clear-cart-button" class="w-full bg-secondary/20 text-light font-bold py-3 px-6 rounded-full hover:bg-secondary/40 transition">
                         Vaciar Carrito
                     </button>
@@ -532,8 +549,6 @@
                 
                 cartTotalEl.textContent = `$${total.toFixed(2)}`;
                 cartCountEl.textContent = totalItems;
-                
-                renderPayPalButton(total);
             }
             
             function clearCart() {
@@ -541,35 +556,6 @@
                 renderCart();
             }
             
-            function renderPayPalButton(total) {
-                const container = document.getElementById('paypal-button-container');
-                container.innerHTML = ''; // Clear previous button
-                if (total > 0) {
-                    paypal.Buttons({
-                        createOrder: function(data, actions) {
-                            return actions.order.create({
-                                purchase_units: [{
-                                    amount: {
-                                        value: total.toFixed(2)
-                                    }
-                                }]
-                            });
-                        },
-                        onApprove: function(data, actions) {
-                            return actions.order.capture().then(function(details) {
-                                alert('¡Pago completado! Gracias, ' + details.payer.name.given_name);
-                                clearCart();
-                                cartModal.classList.add('opacity-0', 'pointer-events-none');
-                            });
-                        },
-                        onError: function(err) {
-                            console.error('Error de PayPal:', err);
-                            alert('Ocurrió un error con el pago. Por favor, inténtalo de nuevo.');
-                        }
-                    }).render('#paypal-button-container');
-                }
-            }
-
             // --- Event Listeners ---
             productsContainer.addEventListener('click', (e) => {
                 if (e.target.closest('.add-to-cart-btn')) {
@@ -597,6 +583,7 @@
             cartButton.addEventListener('click', () => {
                 cartModal.classList.remove('opacity-0', 'pointer-events-none');
                 cartModal.querySelector('.modal-container').classList.remove('scale-95');
+                renderHostedButton(); // <-- pinta el botón Hosted cuando abres el carrito
             });
 
             closeModalButton.addEventListener('click', () => {
@@ -746,6 +733,23 @@
                     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
                 });
             });
+
+            /* -------- PayPal Hosted Button Render -------- */
+            function renderHostedButton() {
+              // Si el SDK ya cargó y aún no se ha renderizado, lo pintamos
+              if (window.paypal && document.getElementById('paypal-container-M5L3H3WKUQ3H8')) {
+                // Evita doble render
+                if (!document.getElementById('paypal-container-M5L3H3WKUQ3H8').dataset.rendered) {
+                  paypal.HostedButtons({
+                    hostedButtonId: "M5L3H3WKUQ3H8",
+                  }).render("#paypal-container-M5L3H3WKUQ3H8");
+                  document.getElementById('paypal-container-M5L3H3WKUQ3H8').dataset.rendered = "true";
+                }
+              } else {
+                // Reintenta hasta que el SDK esté listo
+                setTimeout(renderHostedButton, 150);
+              }
+            }
 
             // --- Initial Render ---
             renderProducts();
